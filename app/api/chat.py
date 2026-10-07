@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.models.chat import ChatRequest, ChatResponse
+from app.services.llm_service import LLMService
 
 
 router = APIRouter(
@@ -8,9 +9,11 @@ router = APIRouter(
     tags=["Chat"]
 )
 
+llm_service = LLMService()
+
 
 @router.post("", response_model=ChatResponse)
 def chat(request: ChatRequest):
-    return ChatResponse(
-        response=f"You said: {request.message}"
-    )
+    response = llm_service.generate_response(request.message)
+
+    return ChatResponse(response=response)
