@@ -1,6 +1,7 @@
 import os
 
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 
 from app.api.chat import router as chat_router
 
@@ -13,6 +14,11 @@ app = FastAPI(
 )
 
 app.include_router(chat_router)
+
+
+@app.get("/")
+def redirect_to_endpoint():
+    return RedirectResponse(url="/docs")
 
 @app.get("/health")
 def health_check():
