@@ -1,3 +1,4 @@
+
 import os
 
 from groq import Groq
@@ -22,9 +23,20 @@ class LLMService:
             model="openai/gpt-oss-120b",
             messages=[
                 {
+                    "role": "system",
+                    "content": (
+                        "You are a hotel customer support assistant. "
+                        "Answer clearly and honestly. "
+                        "Only provide hotel-specific facts when they are "
+                        "supported by information provided in the conversation. "
+                        "If the information is missing, explicitly say that "
+                        "you do not have enough information to answer."
+                    ),
+                },
+                {
                     "role": "user",
                     "content": message,
-                }
+                },
             ],
         )
 
