@@ -136,6 +136,29 @@ ENV/
 env.bak/
 venv.bak/
 
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.sql
+
+# Secrets and keys
+*.key
+*.pem
+*.crt
+secrets/
+credentials/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -181,3 +204,6 @@ cython_debug/
 .cursorindexingignore
 
 chroma_db/
+agent/opencode.json
+agent/AGENT_TASK.md
+/test

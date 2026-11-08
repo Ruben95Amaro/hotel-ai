@@ -1,6 +1,10 @@
-
 from app.services.llm_service import LLMService
 from app.services.rag_service import RAGService
+from app.agent.tools.registry import ToolRegistry
+from app.agent.agent_service import AgentService
+from app.memory.factory import get_memory_store
+from app.memory.models import Conversation
+from app.settings.config import settings
 
 
 class ChatService:
@@ -15,6 +19,12 @@ class ChatService:
     ) -> None:
         self.llm_service = llm_service
         self.rag_service = rag_service
+        self._distance_threshold = settings.rag_distance_threshold
+        
+        # Initialize agent components
+        self._tool_registry = ToolRegistry(rag_service)
+        self._memory_store = get_memory_store()
+        self._agent_service = AgentService(llm_service, self._tool_registry, self._memory_store)
 
     @staticmethod
     def _get_documents(results: list[dict]) -> list[str]:
@@ -22,6 +32,13 @@ class ChatService:
             result["document"]
             for result in results
             if result.get("document")
+        ]
+
+    def _filter_relevant_results(self, results: list[dict]) -> list[dict]:
+        """Filter results by distance threshold."""
+        return [
+            result for result in results
+            if result.get("distance", 1.0) <= self._distance_threshold
         ]
 
     @staticmethod
@@ -35,9 +52,21 @@ class ChatService:
 
         return None
 
-    def generate_response(self, message: str) -> str:
-        results = self.rag_service.search(query=message, limit=3)
-        documents = self._get_documents(results)
+    async def generate_response(self, message: str, session_id: str) -> str:
+        """Generate response using the agent pipeline with conversation memory."""
+        try:
+            return await self._agent_service.process_message(message, session_id)
+        except Exception:
+            # Fallback to original RAG flow if agent fails
+            return await self._fallback_generate_response(message)
+
+    async def _fallback_generate_response(self, message: str) -> str:
+        """Original RAG-based response generation as fallback."""
+        results = await self.rag_service.search(query=message, limit=settings.rag_search_limit)
+
+        # Filter by distance threshold
+        relevant_results = self._filter_relevant_results(results)
+        documents = self._get_documents(relevant_results)
 
         question = message.lower()
 
@@ -55,11 +84,12 @@ class ChatService:
 
             # Search the relevant section directly if the first
             # semantic search did not return the check-in information.
-            results = self.rag_service.search(
+            results = await self.rag_service.search(
                 query="Check-in and Check-out",
                 limit=5,
             )
-            documents = self._get_documents(results)
+            relevant_results = self._filter_relevant_results(results)
+            documents = self._get_documents(relevant_results)
 
             check_in_time = self._find_check_in_time(documents)
 
@@ -88,5 +118,5 @@ User question:
 Answer:
 """
 
-        response = self.llm_service.generate_response(prompt)
+        response = await self.llm_service.generate_response(prompt)
         return response.strip() or self.FALLBACK_RESPONSE

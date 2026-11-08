@@ -1,0 +1,69 @@
+# .dockerignore - files to exclude from Docker build context
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+*.cover
+*.pyc
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Logs
+*.log
+logs/
+
+# Test outputs
+htmlcov/
+.coverage
+.tox/
+
+# Local config (secrets)
+.env.development
+.env.production
+*.env.local
+
+# Documentation
+docs/
+*.md
+
+# Tests
+test/
+test_*.py
+
+# Data (will be mounted)
+data/
+chroma_db/
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
