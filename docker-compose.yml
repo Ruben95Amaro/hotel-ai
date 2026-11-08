@@ -21,6 +21,23 @@ services:
       retries: 3
       start_period: 60s
 
+  web:
+    build:
+      context: ./website
+      dockerfile: Dockerfile
+    container_name: hotel-ai-web
+    ports:
+      - "3000:80"
+    depends_on:
+      - app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
   redis:
     image: redis:7-alpine
     container_name: hotel-ai-redis

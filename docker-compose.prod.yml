@@ -28,6 +28,32 @@ services:
           cpus: '1'
           memory: 1G
 
+  web:
+    build:
+      context: ./website
+      dockerfile: Dockerfile
+    container_name: hotel-ai-web
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - app
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
   redis:
     image: redis:7-alpine
     container_name: hotel-ai-redis

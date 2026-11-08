@@ -356,22 +356,37 @@ class PostgresDatabaseManager(DatabaseManager):
         )
 
     async def initialize(self) -> None:
-        """Initialize database connection pool."""
-        self._engine = create_async_engine(
-            self._database_url,
-            pool_size=self._settings.postgres_pool_size,
-            max_overflow=self._settings.postgres_max_overflow,
-            pool_pre_ping=True,
-            echo=self._settings.environment == "development",
-        )
-        self._session_factory = async_sessionmaker(
-            self._engine, class_=AsyncSession, expire_on_commit=False
-        )
-        self._user_repo = PostgresUserRepository(self._session_factory)
-        self._reservation_repo = PostgresReservationRepository(self._session_factory)
-        # Create tables
-        async with self._engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+        """Initialize database connection pool with retry logic."""
+        import asyncio
+        from sqlalchemy.exc import OperationalError
+        
+        max_retries = 10
+        retry_delay = 3
+        
+        for attempt in range(max_retries):
+            try:
+                self._engine = create_async_engine(
+                    self._database_url,
+                    pool_size=self._settings.postgres_pool_size,
+                    max_overflow=self._settings.postgres_max_overflow,
+                    pool_pre_ping=True,
+                    echo=self._settings.environment == "development",
+                )
+                self._session_factory = async_sessionmaker(
+                    self._engine, class_=AsyncSession, expire_on_commit=False
+                )
+                self._user_repo = PostgresUserRepository(self._session_factory)
+                self._reservation_repo = PostgresReservationRepository(self._session_factory)
+                # Create tables
+                async with self._engine.begin() as conn:
+                    await conn.run_sync(Base.metadata.create_all)
+                return
+            except OperationalError as e:
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(retry_delay)
+                    retry_delay = min(retry_delay * 1.5, 30)  # Exponential backoff
+                else:
+                    raise
 
     async def close(self) -> None:
         """Close database connections."""
