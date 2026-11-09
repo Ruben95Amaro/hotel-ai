@@ -358,10 +358,12 @@ class PostgresDatabaseManager(DatabaseManager):
     async def initialize(self) -> None:
         """Initialize database connection pool with retry logic."""
         import asyncio
-        from sqlalchemy.exc import OperationalError
+        from sqlalchemy.exc import OperationalError, DisconnectionError
+        from app.logging.structured import get_logger
         
-        max_retries = 10
-        retry_delay = 3
+        logger = get_logger(__name__)
+        max_retries = 15
+        retry_delay = 2
         
         for attempt in range(max_retries):
             try:
@@ -377,15 +379,33 @@ class PostgresDatabaseManager(DatabaseManager):
                 )
                 self._user_repo = PostgresUserRepository(self._session_factory)
                 self._reservation_repo = PostgresReservationRepository(self._session_factory)
-                # Create tables
+                # Create tables - this tests the connection
                 async with self._engine.begin() as conn:
                     await conn.run_sync(Base.metadata.create_all)
+                logger.info("Database initialized successfully", extra={"attempt": attempt + 1})
                 return
-            except OperationalError as e:
+            except (OperationalError, DisconnectionError, ConnectionError, OSError) as e:
                 if attempt < max_retries - 1:
+                    logger.warning(
+                        "Database connection failed, retrying",
+                        extra={"attempt": attempt + 1, "max_retries": max_retries, "error": str(e), "delay": retry_delay}
+                    )
                     await asyncio.sleep(retry_delay)
-                    retry_delay = min(retry_delay * 1.5, 30)  # Exponential backoff
+                    retry_delay = min(retry_delay * 1.5, 30)
                 else:
+                    logger.error("Database connection failed after all retries", extra={"attempts": max_retries, "error": str(e)})
+                    raise
+            except Exception as e:
+                # Catch any other unexpected errors during init
+                if attempt < max_retries - 1:
+                    logger.warning(
+                        "Database initialization error, retrying",
+                        extra={"attempt": attempt + 1, "max_retries": max_retries, "error": str(e), "delay": retry_delay}
+                    )
+                    await asyncio.sleep(retry_delay)
+                    retry_delay = min(retry_delay * 1.5, 30)
+                else:
+                    logger.error("Database initialization failed after all retries", extra={"attempts": max_retries, "error": str(e)})
                     raise
 
     async def close(self) -> None:
@@ -401,7 +421,10 @@ class PostgresDatabaseManager(DatabaseManager):
             async with self._engine.connect() as conn:
                 await conn.execute(select(1))
             return True
-        except Exception:
+        except Exception as e:
+            from app.logging.structured import get_logger
+            logger = get_logger(__name__)
+            logger.warning("Database health check failed", extra={"error": str(e)})
             return False
 
     async def run_migrations(self) -> None:
