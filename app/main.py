@@ -12,6 +12,10 @@ from fastapi.security import APIKeyHeader
 from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
 
 from app.api.chat import router as chat_router
+from app.api.auth import router as auth_router
+from app.api.bookings import router as bookings_router
+from app.api.requests import router as requests_router
+from app.api.hotel import router as hotel_router
 from app.di import get_container, get_rag_service
 from app.services.document_service import DocumentService
 from app.settings.config import settings
@@ -184,6 +188,10 @@ app.add_middleware(
 )
 
 app.include_router(chat_router, dependencies=[Depends(verify_api_key)])
+app.include_router(auth_router, dependencies=[Depends(verify_api_key)])
+app.include_router(bookings_router, dependencies=[Depends(verify_api_key)])
+app.include_router(requests_router, dependencies=[Depends(verify_api_key)])
+app.include_router(hotel_router, dependencies=[Depends(verify_api_key)])
 
 
 @app.get("/")

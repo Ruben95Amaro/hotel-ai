@@ -30,6 +30,7 @@ class UserORM(Base):
     phone: Mapped[str] = mapped_column(String(50), nullable=True)
     document_id: Mapped[str] = mapped_column(String(100), unique=True, nullable=True, index=True)
     nationality: Mapped[str] = mapped_column(String(100), nullable=True)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     preferences: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -75,6 +76,7 @@ def user_orm_to_domain(orm: UserORM) -> User:
         phone=orm.phone or "",
         document_id=orm.document_id or "",
         nationality=orm.nationality or "",
+        password_hash=orm.password_hash or "",
         preferences=orm.preferences or {},
         created_at=orm.created_at,
         updated_at=orm.updated_at,
@@ -111,6 +113,7 @@ def user_domain_to_orm(domain: User) -> UserORM:
         phone=domain.phone,
         document_id=domain.document_id,
         nationality=domain.nationality,
+        password_hash=domain.password_hash,
         preferences=domain.preferences,
         created_at=domain.created_at,
         updated_at=domain.updated_at,

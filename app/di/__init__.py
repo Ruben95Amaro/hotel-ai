@@ -6,6 +6,9 @@ from app.di.container import (
     get_rag_service,
     get_memory_store,
     get_chat_service,
+    get_db_manager,
+    get_user_repository,
+    get_reservation_repository,
 )
 
 __all__ = [
@@ -16,4 +19,7 @@ __all__ = [
     "get_rag_service",
     "get_memory_store",
     "get_chat_service",
+    "get_db_manager",
+    "get_user_repository",
+    "get_reservation_repository",
 ]

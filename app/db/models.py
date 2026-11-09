@@ -36,6 +36,7 @@ class User:
     phone: str = ""
     document_id: str = ""  # Passport/ID number
     nationality: str = ""
+    password_hash: str = ""  # Hashed password
     preferences: dict = field(default_factory=dict)  # Room preferences, dietary, etc.
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
