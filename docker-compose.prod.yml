@@ -6,6 +6,10 @@ services:
       - "8000:8000"
     env_file:
       - .env.production
+    environment:
+      - POSTGRES_HOST=postgres
+      - REDIS_URL=redis://redis:6379/0
+      - CHROMADB_HOST=chromadb
     volumes:
       - ./data:/app/data
     depends_on:
