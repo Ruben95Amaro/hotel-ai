@@ -1,4 +1,5 @@
 # Dockerfile for Hotel AI Assistant
+# Build: 2026-11-09-v2 (forces rebuild with improved DB retry logic)
 FROM python:3.11-slim
 
 # Set working directory
