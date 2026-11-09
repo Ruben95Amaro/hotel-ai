@@ -358,10 +358,10 @@ class PostgresDatabaseManager(DatabaseManager):
     async def initialize(self) -> None:
         """Initialize database connection pool with retry logic."""
         import asyncio
+        import logging
         from sqlalchemy.exc import OperationalError, DisconnectionError
-        from app.logging.structured import get_logger
         
-        logger = get_logger(__name__)
+        logger = logging.getLogger(__name__)
         max_retries = 15
         retry_delay = 2
         
@@ -415,6 +415,8 @@ class PostgresDatabaseManager(DatabaseManager):
 
     async def health_check(self) -> bool:
         """Check database connectivity."""
+        import logging
+        logger = logging.getLogger(__name__)
         try:
             if not self._engine:
                 return False
@@ -422,8 +424,6 @@ class PostgresDatabaseManager(DatabaseManager):
                 await conn.execute(select(1))
             return True
         except Exception as e:
-            from app.logging.structured import get_logger
-            logger = get_logger(__name__)
             logger.warning("Database health check failed", extra={"error": str(e)})
             return False
 
