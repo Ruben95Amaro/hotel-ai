@@ -70,6 +70,14 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     log_format: str = "json"
 
+    # JWT
+    jwt_secret: str = Field(default="your-super-secret-jwt-key-change-in-production", alias="JWT_SECRET")
+
+    # Admin User (for initial setup)
+    admin_email: str = Field(default="admin@grandoceanhotel.com", alias="ADMIN_EMAIL")
+    admin_password: str = Field(default="AdminPass123", alias="ADMIN_PASSWORD")
+    admin_name: str = Field(default="Hotel Administrator", alias="ADMIN_NAME")
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

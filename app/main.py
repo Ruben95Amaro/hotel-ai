@@ -101,6 +101,10 @@ async def lifespan(app: FastAPI):
     container = get_container()
     await container.initialize()
     
+    # Seed database with initial data (admin user, etc.)
+    from app.db.seed import seed_database
+    await seed_database(container.user_repository)
+    
     # Use the same RAG service instance that the API depends on
     rag_service = get_rag_service()
     await rag_service.add_chunks(chunks)
