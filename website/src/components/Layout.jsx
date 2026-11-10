@@ -216,7 +216,7 @@ export default function Layout({ children }) {
                 <li><Link to="/rooms" className="hover:text-white transition-colors">Rooms & Suites</Link></li>
                 <li><Link to="/services" className="hover:text-white transition-colors">Services</Link></li>
                 <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
-                <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+                <li><Link to="/about" className="hover:text-white transition-colors">Contact</Link></li>
               </ul>
             </div>
             <div>

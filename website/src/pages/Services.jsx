@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { hotelApi } from '../services/api'
-import { Waves, Utensils, Flower2 as Spa, Dumbbell, Car, Wifi, ConciergeBell, ShoppingBag, Baby, Sparkles, Loader2, CheckCircle } from 'lucide-react'
+import { Waves, Utensils, Flower2 as Spa, Dumbbell, Car, Wifi, ConciergeBell, ShoppingBag, Baby, Sparkles, Loader2, CheckCircle, MapPin } from 'lucide-react'
 
 const servicesData = [
   {

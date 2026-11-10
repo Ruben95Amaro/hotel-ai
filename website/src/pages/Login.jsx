@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { Hotel, Loader2, Eye, EyeOff, CheckCircle, AlertCircle, Mail, Lock, User } from 'lucide-react'
 import toast from 'react-hot-toast'

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { hotelApi } from '../services/api'
 import { Heart, Loader2, Plus, Send, X, CheckCircle, Clock, AlertCircle, Zap, MessageSquare, ChevronDown, ChevronUp, Utensils, Accessibility as Wheelchair, Sparkles, Car, FileText } from 'lucide-react'
@@ -28,6 +29,7 @@ export default function Requests() {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [expandedId, setExpandedId] = useState(null)
+  const navigate = useNavigate()
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm()
 
@@ -105,8 +107,8 @@ export default function Requests() {
             <h2 className="font-display text-2xl font-medium text-gray-900 mb-3">Sign in for Special Requests</h2>
             <p className="text-gray-600 mb-6">Submit and track special requests for your stay.</p>
             <div className="flex space-x-3">
-              <button onClick={() => window.location.href = '/login'} className="btn-primary flex-1">Sign In</button>
-              <button onClick={() => window.location.href = '/register'} className="btn-secondary flex-1">Sign Up</button>
+              <button onClick={() => navigate('/login')} className="btn-primary flex-1">Sign In</button>
+              <button onClick={() => navigate('/register')} className="btn-secondary flex-1">Sign Up</button>
             </div>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { hotelApi } from '../services/api'
 import { Calendar, Users, Star, XCircle, Loader2, AlertCircle, CheckCircle, Clock, ChevronDown, ChevronUp, MessageSquare, Heart, Zap } from 'lucide-react'
@@ -29,6 +30,7 @@ export default function Bookings() {
   const [cancelReason, setCancelReason] = useState('')
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [expandedId, setExpandedId] = useState(null)
+  const navigate = useNavigate()
 
   const { register, handleSubmit, reset } = useForm()
 
@@ -106,7 +108,7 @@ export default function Bookings() {
 
   const handleChat = (booking) => {
     // Navigate to chat with booking context
-    window.location.href = `/chat?booking=${booking.confirmation_code}`
+    navigate(`/chat?booking=${booking.confirmation_code}`)
   }
 
   if (!isAuthenticated) {
@@ -120,8 +122,8 @@ export default function Bookings() {
             <h2 className="font-display text-2xl font-medium text-gray-900 mb-3">Sign in to View Bookings</h2>
             <p className="text-gray-600 mb-6">Access your reservations, make changes, and contact our team.</p>
             <div className="flex space-x-3">
-              <button onClick={() => window.location.href = '/login'} className="btn-primary flex-1">Sign In</button>
-              <button onClick={() => window.location.href = '/register'} className="btn-secondary flex-1">Sign Up</button>
+              <button onClick={() => navigate('/login')} className="btn-primary flex-1">Sign In</button>
+              <button onClick={() => navigate('/register')} className="btn-secondary flex-1">Sign Up</button>
             </div>
           </div>
         </div>
@@ -149,7 +151,7 @@ export default function Bookings() {
             </div>
             <h2 className="font-display text-2xl font-medium text-gray-900 mb-3">No Bookings Yet</h2>
             <p className="text-gray-600 mb-6">Your upcoming and past reservations will appear here.</p>
-            <button onClick={() => window.location.href = '/rooms'} className="btn-primary">
+            <button onClick={() => navigate('/rooms')} className="btn-primary">
               Book Your First Stay
             </button>
           </div>

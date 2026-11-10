@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { hotelApi } from '../services/api'
 import { Star, Waves, Wifi, Coffee, Car, Dumbbell, Flower2 as SpaIcon, Utensils, Loader2, MapPin, ChevronRight, CheckCircle } from 'lucide-react'
 
@@ -72,6 +72,7 @@ export default function Rooms() {
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
   const [guests, setGuests] = useState(2)
+  const navigate = useNavigate()
 
   useEffect(() => {
     // Fetch rooms from API if needed
@@ -106,7 +107,7 @@ export default function Rooms() {
       return
     }
     // Navigate to booking page with room and dates
-    window.location.href = `/booking?room=${room.id}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`
+    navigate(`/booking?room=${room.id}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`)
   }
 
   const nights = calculateNights()
@@ -287,7 +288,7 @@ export default function Rooms() {
           <p className="text-primary-100 mb-8 max-w-2xl mx-auto">
             Contact our reservations team for custom packages, extended stays, or special arrangements.
           </p>
-          <Link to="/contact" className="btn bg-white text-primary-600 hover:bg-primary-50 px-8 py-4 text-lg">
+          <Link to="/about" className="btn bg-white text-primary-600 hover:bg-primary-50 px-8 py-4 text-lg">
             Contact Us
           </Link>
         </div>

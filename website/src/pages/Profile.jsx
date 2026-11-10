@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { hotelApi } from '../services/api'
 import { User, Mail, Phone, MapPin, Calendar, Loader2, Save, AlertCircle, CheckCircle } from 'lucide-react'
@@ -9,6 +10,7 @@ export default function Profile() {
   const { user, isAuthenticated } = useAuth()
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const navigate = useNavigate()
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: {
@@ -58,8 +60,8 @@ export default function Profile() {
             <h2 className="font-display text-2xl font-medium text-gray-900 mb-3">Sign in to View Profile</h2>
             <p className="text-gray-600 mb-6">Manage your personal information and preferences.</p>
             <div className="flex space-x-3">
-              <button onClick={() => window.location.href = '/login'} className="btn-primary flex-1">Sign In</button>
-              <button onClick={() => window.location.href = '/register'} className="btn-secondary flex-1">Sign Up</button>
+              <button onClick={() => navigate('/login')} className="btn-primary flex-1">Sign In</button>
+              <button onClick={() => navigate('/register')} className="btn-secondary flex-1">Sign Up</button>
             </div>
           </div>
         </div>

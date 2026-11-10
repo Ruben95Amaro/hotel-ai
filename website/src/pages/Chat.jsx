@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { hotelApi } from '../services/api'
 import { Send, Loader2, Bot, User, X, ChevronDown, ChevronUp, Trash2, Copy, Check } from 'lucide-react'
@@ -13,6 +14,7 @@ export default function Chat() {
   const [showHistory, setShowHistory] = useState(false)
   const messagesEndRef = useRef(null)
   const chatContainerRef = useRef(null)
+  const navigate = useNavigate()
 
   const { register, handleSubmit } = React.useForm()
 
@@ -79,8 +81,8 @@ export default function Chat() {
             <h2 className="font-display text-2xl font-medium text-gray-900 mb-3">Sign in to Chat</h2>
             <p className="text-gray-600 mb-6">Access your AI concierge for personalized assistance.</p>
             <div className="flex space-x-3">
-              <button onClick={() => window.location.href = '/login'} className="btn-primary flex-1">Sign In</button>
-              <button onClick={() => window.location.href = '/register'} className="btn-secondary flex-1">Sign Up</button>
+              <button onClick={() => navigate('/login')} className="btn-primary flex-1">Sign In</button>
+              <button onClick={() => navigate('/register')} className="btn-secondary flex-1">Sign Up</button>
             </div>
           </div>
         </div>
