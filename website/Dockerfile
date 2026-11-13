@@ -12,6 +12,9 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Cache bust arg (place after COPY to invalidate build layer)
+ARG CACHE_BUST=1
+
 # Build application
 RUN npm run build
 

@@ -8,13 +8,22 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    const storedUser = localStorage.getItem('user')
-    if (token && storedUser) {
-      setUser(JSON.parse(storedUser))
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    try {
+      const token = localStorage.getItem('token')
+      const storedUser = localStorage.getItem('user')
+      if (token && storedUser) {
+        const parsedUser = JSON.parse(storedUser)
+        setUser(parsedUser)
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      }
+    } catch (e) {
+      // Clear corrupted data
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      console.warn('Failed to parse stored auth data, cleared:', e)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }, [])
 
   const login = async (email, password) => {
@@ -55,9 +64,10 @@ export function AuthProvider({ children }) {
     loading,
   }
 
+  // Never block rendering — always provide context, let consumers handle loading
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   )
 }

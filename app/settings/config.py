@@ -11,11 +11,12 @@ class Settings(BaseSettings):
     app_name: str = "Hotel AI Assistant"
     app_version: str = "1.0.0"
     environment: str = "development"
-    testing: bool = False
+    testing: bool = Field(default=False, alias="TESTING")
     
     # Hotel Configuration
     hotel_name: str = Field(default="Grand Ocean Hotel", alias="HOTEL_NAME")
     hotel_location: str = Field(default="Lisbon", alias="HOTEL_LOCATION")
+    hotel_address: str = Field(default="Rua do Ouro 123, 1100-063 Lisbon, Portugal", alias="HOTEL_ADDRESS")
     hotel_stars: int = Field(default=4, alias="HOTEL_STARS")
     hotel_phone: str = Field(default="+351 (XX) XXXX-XXXX", alias="HOTEL_PHONE")
     hotel_email: str = Field(default="info@grandoceanhotel.com", alias="HOTEL_EMAIL")

@@ -192,10 +192,10 @@ app.add_middleware(
 )
 
 app.include_router(chat_router, dependencies=[Depends(verify_api_key)])
-app.include_router(auth_router, dependencies=[Depends(verify_api_key)])
+app.include_router(auth_router)  # Public - login/register
 app.include_router(bookings_router, dependencies=[Depends(verify_api_key)])
 app.include_router(requests_router, dependencies=[Depends(verify_api_key)])
-app.include_router(hotel_router, dependencies=[Depends(verify_api_key)])
+app.include_router(hotel_router)  # Public - rooms, services, info
 
 
 @app.get("/")

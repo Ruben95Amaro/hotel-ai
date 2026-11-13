@@ -363,6 +363,7 @@ class PostgresDatabaseManager(DatabaseManager):
         import asyncio
         import logging
         from sqlalchemy.exc import OperationalError, DisconnectionError
+        from sqlalchemy import text
         
         logger = logging.getLogger(__name__)
         max_retries = 15
@@ -385,6 +386,8 @@ class PostgresDatabaseManager(DatabaseManager):
                 # Create tables - this tests the connection
                 async with self._engine.begin() as conn:
                     await conn.run_sync(Base.metadata.create_all)
+                    # Run migrations for missing columns
+                    await self._run_migrations(conn)
                 logger.info("Database initialized successfully", extra={"attempt": attempt + 1})
                 return
             except (OperationalError, DisconnectionError, ConnectionError, OSError) as e:
@@ -436,6 +439,27 @@ class PostgresDatabaseManager(DatabaseManager):
         if self._engine:
             async with self._engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
+                await self._run_migrations(conn)
+
+    async def _run_migrations(self, conn) -> None:
+        """Run ad-hoc migrations for schema updates."""
+        import logging
+        from sqlalchemy import text
+        logger = logging.getLogger(__name__)
+        
+        # Check if password_hash column exists in users table
+        result = await conn.execute(text("""
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'users' AND column_name = 'password_hash'
+        """))
+        if not result.scalar_one_or_none():
+            logger.info("Adding missing password_hash column to users table")
+            await conn.execute(text("""
+                ALTER TABLE users 
+                ADD COLUMN password_hash VARCHAR(255) NOT NULL DEFAULT ''
+            """))
+            logger.info("Successfully added password_hash column")
 
     @property
     def user_repository(self) -> UserRepository:

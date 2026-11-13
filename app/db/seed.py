@@ -33,21 +33,15 @@ async def create_admin_user(user_repo: UserRepository) -> User:
     # Check if admin already exists
     existing_admin = await user_repo.get_by_email(admin_email)
     if existing_admin:
-        # Ensure it's an admin
-        if not existing_admin.is_admin:
-            existing_admin.is_admin = True
-            existing_admin.updated_at = datetime.utcnow()
-            await user_repo.update(existing_admin)
         return existing_admin
     
-    # Create new admin user
+    # Create new admin user (admin status determined by CORS/origin, not a boolean field)
     admin_user = User(
         id=str(uuid.uuid4()),
         email=admin_email,
         full_name=admin_name,
         phone="",
         password_hash=hash_password(admin_password),
-        is_admin=True,
         is_active=True,
         preferences={},
         created_at=datetime.utcnow(),
