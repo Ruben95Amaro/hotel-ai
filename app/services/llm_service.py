@@ -52,8 +52,58 @@ class LLMService:
     )
     async def generate_response(self, message: str) -> str:
         if self._settings.testing:
-            # Return mock responses based on message content for testing
             message_lower = message.lower()
+            
+            # Check if this is an intent detection prompt (contains tool descriptions and format instructions)
+            if ("intent detection" in message_lower or "available tools" in message_lower) and "respond with a json object" in message_lower:
+                # Return a proper JSON for intent detection - default to search_hotel_docs for info queries
+                import json
+                return json.dumps({
+                    "tool_name": "search_hotel_docs",
+                    "arguments": {"query": "What is the check-in time?", "limit": 5},
+                    "reasoning": "User is asking for hotel information, use search tool"
+                })
+            
+            # Check if this is a response generation prompt (contains "Now provide a helpful, natural response")
+            if "now provide a helpful, natural response" in message_lower:
+                # Extract the actual user question from the prompt (after "The user asked:")
+                import re
+                user_question_match = re.search(r'The user asked:\s*"([^"]+)"', message)
+                user_question = user_question_match.group(1).lower() if user_question_match else ""
+                
+                # Extract tool result from the prompt
+                tool_result_match = re.search(r'Tool result:\s*(.+?)(?:\n\nNow|\n$)', message, re.DOTALL)
+                tool_result = tool_result_match.group(1).lower() if tool_result_match else ""
+                
+                # Use user question for keyword matching (not the full prompt)
+                if "check-in" in user_question or "check in" in user_question:
+                    return "Check-in starts at 15:00."
+                if "check-out" in user_question or "check out" in user_question:
+                    return "Check-out is until 11:00."
+                if "room" in user_question:
+                    return "The hotel offers Standard Room, Deluxe Room, and Family Suite."
+                if "facilit" in user_question:
+                    return "The hotel provides outdoor swimming pool, fitness center, restaurant, bar, 24-hour reception, free Wi-Fi, and private parking."
+                if "pet" in user_question or "dog" in user_question:
+                    return "Pets are allowed in selected rooms. Please contact the hotel to confirm availability."
+                if "cancel" in user_question:
+                    return "Reservations can be cancelled free of charge up to 48 hours before arrival."
+                if "location" in user_question or "address" in user_question or "where" in user_question:
+                    return "The Grand Ocean Hotel is located at Avenida da Liberdade 123, 1250-147 Lisbon, Portugal."
+                if "phone" in user_question:
+                    return "You can reach us at +351 21 123 4567."
+                if "email" in user_question:
+                    return "You can contact us at info@grandoceanhotel.com."
+                if "service" in user_question:
+                    return "The hotel offers room service, laundry, concierge, airport shuttle, and meeting rooms."
+                if "price" in user_question or "rate" in user_question or "cost" in user_question:
+                    return "Standard Room: €120/night, Deluxe Room: €180/night, Family Suite: €250/night."
+                # Fallback - use tool result if available
+                if tool_result and "don't have" not in tool_result and "don't have" not in tool_result:
+                    return f"Based on the hotel documentation: {tool_result}"
+                return "I don't have enough information to answer that question. Please ask about check-in/out times, rooms, facilities, policies, or contact information."
+            
+            # Return mock responses based on message content for testing (direct questions)
             if "check-in" in message_lower or "check in" in message_lower:
                 return "Check-in starts at 15:00."
             if "check-out" in message_lower or "check out" in message_lower:

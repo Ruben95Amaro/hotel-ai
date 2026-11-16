@@ -19,7 +19,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               background: '#1f2937',
               color: '#fff',
               borderRadius: '0.75rem',
-              padding: '1rem',
+              paddiwng: '1rem',
             },
             success: {
               iconTheme: {
