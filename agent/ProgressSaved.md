@@ -1,6 +1,6 @@
 # Progress Saved - Hotel AI Docker Fix & RAG Stabilization
 
-## Date: 2026-11-16
+## Date: 2026-11-18
 
 ## Phase 1: Audit & Docker Fixes (COMPLETED)
 
@@ -70,6 +70,38 @@
 ✅ Cancellation policy (48 hours free)  
 ✅ All containers healthy (web, app, postgres, redis, chromadb)
 
+## Phase 3: Frontend Polish (IN PROGRESS - 90% COMPLETE)
+
+### Issues Fixed
+
+1. **Frontend Auth Flow (Login.jsx, Register.jsx)**
+   - **Problem**: Mock authentication instead of real backend API
+   - **Fix**: Updated to use AuthContext's `login()` and `register()` methods which call backend
+
+2. **Missing Heart Icon Import (About.jsx)**
+   - **Problem**: `ReferenceError: Heart is not defined` at runtime
+   - **Fix**: Added `Heart` to lucide-react imports in About.jsx
+
+3. **User Model - is_admin Field (app/db/models.py)**
+   - **Problem**: Login endpoint tried to access `user.is_admin` but field didn't exist
+   - **Fix**: Added `is_admin: bool = False` to User dataclass
+
+4. **Database Unique Constraint Violation (app/db/postgres.py)**
+   - **Problem**: `document_id` unique constraint violated when multiple users registered without document_id (empty string `""` stored instead of NULL)
+   - **Fix**: Convert empty strings to `None` for nullable fields in `user_domain_to_orm()`
+
+### Verified Working
+
+✅ **Frontend (http://localhost:3000/)** - All pages accessible, no JS errors  
+✅ **SPA Routing** - Client-side navigation works  
+✅ **Static Assets** - JS, CSS, images loading correctly  
+✅ **API Proxy** - `/api/*` requests forwarded to backend  
+✅ **Backend API** - Running with working mock embeddings  
+✅ **RAG Flow** - Agent → Intent Detection → Tool → Response working  
+✅ **All Containers** - web, app, postgres, redis, chromadb healthy  
+✅ **Auth Endpoints** - Login and Register working with seeded admin user  
+✅ **Admin User** - `admin@grandoceanhotel.com` / `AdminPass123` (seeded on startup)
+
 ### Test Commands
 
 ```bash
@@ -78,26 +110,31 @@ curl -X POST http://localhost:3000/api/chat \
   -H "Content-Type: application/json" \
   -H "X-API-Key: dev-key-12345" \
   -d '{"message": "What is the check-in time?", "session_id": "test-1"}'
+
+# Test login API
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: dev-key-12345" \
+  -d '{"email": "admin@grandoceanhotel.com", "password": "AdminPass123"}'
+
+# Test register API
+curl -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: dev-key-12345" \
+  -d '{"email": "test@example.com", "password": "TestPass123", "first_name": "Test", "last_name": "User", "phone": "+351 912 345 678"}'
 ```
 
 ## Current Status
 
-✅ **Frontend (http://localhost:3000/)** - All pages accessible  
-✅ **SPA Routing** - Client-side navigation works  
-✅ **Static Assets** - JS, CSS, images loading correctly  
-✅ **API Proxy** - `/api/*` requests forwarded to backend  
-✅ **Backend API** - Running with working mock embeddings  
-✅ **RAG Flow** - Agent → Intent Detection → Tool → Response working  
-✅ **All Containers** - web, app, postgres, redis, chromadb healthy
+**Phase 1-3 Complete**: Core infrastructure, RAG, and frontend auth flow are working.
 
-## Phase 3: Frontend Polish (IN PROGRESS)
-
-### Next Steps
-
-1. **Browser Verification** - Test website in browser:
-   - Home page renders correctly (hero, features, stats, CTA)
+**Phase 4: Final Verification & Edge Cases (NEXT)**
+1. **Browser Testing** - Full end-to-end test in browser:
+   - Home page renders (hero, features, stats, CTA)
    - Navigation works (Rooms, Services, About, Contact, Chat)
+   - Login/Register pages work with backend
    - Chat page accessible after login
+   - Chat suggestions and message history work
    - Responsive design (desktop/mobile)
 
 2. **Chat Integration Testing**:
@@ -106,16 +143,11 @@ curl -X POST http://localhost:3000/api/chat \
    - Check suggestion buttons work
    - Test message history and copy functionality
 
-3. **UI/UX Improvements**:
-   - Verify footer color is dark gray
-   - Check hero-pattern.svg loads
-   - Verify Tailwind CSS classes render correctly
-   - Test form inputs and buttons
-
-4. **Authentication Flow**:
-   - Test login/register pages
-   - Verify JWT token handling
-   - Test protected routes redirect
+3. **Edge Cases**:
+   - Empty states
+   - Error handling (network errors, API errors)
+   - Loading states
+   - Form validation
 
 ### Commands to Rebuild/Test
 

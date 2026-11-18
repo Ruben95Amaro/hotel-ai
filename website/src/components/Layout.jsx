@@ -2,6 +2,7 @@ import React from 'react'
 import { Link, useLocation, Outlet } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Menu, X, LogOut, User, Hotel, Search, Calendar, Heart, MessageSquare } from 'lucide-react'
+import ChatWidget from './ChatWidget'
 
 const navigation = [
   { name: 'Home', href: '/' },
@@ -13,7 +14,6 @@ const navigation = [
 const userNavigation = [
   { name: 'My Bookings', href: '/bookings', icon: Calendar },
   { name: 'Special Requests', href: '/requests', icon: Heart },
-  { name: 'AI Assistant', href: '/chat', icon: MessageSquare },
   { name: 'Profile', href: '/profile', icon: User },
 ]
 
@@ -196,6 +196,9 @@ export default function Layout({ children }) {
       <main className="flex-1">
         <Outlet />
       </main>
+
+      {/* Chat Widget - Persistent on all pages */}
+      <ChatWidget />
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white">
