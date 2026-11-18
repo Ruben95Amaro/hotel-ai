@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import { Hotel, Loader2, Eye, EyeOff, CheckCircle, AlertCircle, Mail, Lock, User } from 'lucide-react'
+import { Hotel, Loader2, Eye, EyeOff, Mail, Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -14,25 +16,12 @@ export default function Login() {
   const onSubmit = async (data) => {
     try {
       setLoading(true)
-      // Simulate login
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Mock successful login
-      const mockUser = {
-        id: '1',
-        email: data.email,
-        full_name: 'John Doe',
-        phone: '+351 912 345 678',
-      }
-      const mockToken = 'mock-jwt-token-' + Date.now()
-      
-      localStorage.setItem('token', mockToken)
-      localStorage.setItem('user', JSON.stringify(mockUser))
-      
+      await login(data.email, data.password)
       toast.success('Welcome back!')
       navigate('/')
     } catch (error) {
-      toast.error('Invalid credentials')
+      const message = error.response?.data?.detail || 'Invalid credentials'
+      toast.error(message)
     } finally {
       setLoading(false)
     }

@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import { Hotel, Loader2, Eye, EyeOff, CheckCircle, Mail, Lock, User, Phone, Shield } from 'lucide-react'
+import { Hotel, Loader2, Eye, EyeOff, Mail, Lock, Phone, Shield } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useAuth } from '../context/AuthContext'
 
 export default function Register() {
   const navigate = useNavigate()
+  const { register: authRegister } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -21,24 +23,18 @@ export default function Register() {
     }
     try {
       setLoading(true)
-      // Simulate registration
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      const mockUser = {
-        id: '1',
+      await authRegister({
         email: data.email,
-        full_name: `${data.firstName} ${data.lastName}`,
+        password: data.password,
+        first_name: data.firstName,
+        last_name: data.lastName,
         phone: data.phone,
-      }
-      const mockToken = 'mock-jwt-token-' + Date.now()
-      
-      localStorage.setItem('token', mockToken)
-      localStorage.setItem('user', JSON.stringify(mockUser))
-      
+      })
       toast.success('Account created successfully!')
       navigate('/')
     } catch (error) {
-      toast.error('Registration failed')
+      const message = error.response?.data?.detail || 'Registration failed'
+      toast.error(message)
     } finally {
       setLoading(false)
     }

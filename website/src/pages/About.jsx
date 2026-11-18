@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Waves, Building2, Award, Users, Clock, MapPin, Phone, Mail, Send, Loader2 } from 'lucide-react'
+import { Heart, Waves, Building2, Award, Users, Clock, MapPin, Phone, Mail, Send, Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 
 export default function About() {

@@ -41,6 +41,7 @@ class User:
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
     is_active: bool = True
+    is_admin: bool = False
 
     def __post_init__(self):
         if not self.id:
