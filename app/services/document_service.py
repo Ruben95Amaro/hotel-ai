@@ -33,12 +33,22 @@ class DocumentService:
         current_chunk = ""
 
         section_titles = {
+            # Old sections
             "Hotel Information",
             "Rooms",
             "Facilities",
             "Check-in and Check-out",
             "Pets",
             "Cancellation",
+            # New sections from updated hotel.txt
+            "Location",
+            "Hotel Services",
+            "Restaurant and Dining",
+            "Swimming Pool and Wellness",
+            "Business Facilities",
+            "Additional Information",
+            "Special Offers",
+            "Hotel Sustainability",
         }
 
         for paragraph in paragraphs:

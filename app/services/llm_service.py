@@ -98,6 +98,25 @@ class LLMService:
                     return "The hotel offers room service, laundry, concierge, airport shuttle, and meeting rooms."
                 if "price" in user_question or "rate" in user_question or "cost" in user_question:
                     return "Standard Room: €120/night, Deluxe Room: €180/night, Family Suite: €250/night."
+                # Opening hours queries
+                if "pool" in user_question and ("open" in user_question or "hour" in user_question or "time" in user_question):
+                    return "The outdoor swimming pool is open from 08:00 to 20:00."
+                if "fitness" in user_question and ("open" in user_question or "hour" in user_question or "time" in user_question):
+                    return "The fitness centre is open daily from 06:00 to 22:00."
+                if "breakfast" in user_question and ("open" in user_question or "hour" in user_question or "time" in user_question or "serv" in user_question):
+                    return "Breakfast buffet is served from 07:00 to 10:30."
+                if "lunch" in user_question and ("open" in user_question or "hour" in user_question or "time" in user_question or "serv" in user_question):
+                    return "Lunch is served from 12:00 to 15:00."
+                if "dinner" in user_question and ("open" in user_question or "hour" in user_question or "time" in user_question or "serv" in user_question):
+                    return "Dinner is served from 19:00 to 22:30."
+                if "restaurant" in user_question and ("open" in user_question or "hour" in user_question or "time" in user_question):
+                    return "The restaurant serves breakfast 07:00-10:30, lunch 12:00-15:00, and dinner 19:00-22:30."
+                if "bar" in user_question and ("open" in user_question or "hour" in user_question or "time" in user_question):
+                    return "The hotel bar is open during reception hours."
+                if "reception" in user_question and ("open" in user_question or "hour" in user_question or "time" in user_question or "24" in user_question):
+                    return "The reception is open 24 hours a day."
+                if "hotel" in user_question and ("open" in user_question or "hour" in user_question or "time" in user_question):
+                    return "The reception is open 24 hours a day. Check-in starts at 15:00 and check-out is until 11:00. The pool is open 08:00-20:00, fitness 06:00-22:00, breakfast 07:00-10:30, lunch 12:00-15:00, dinner 19:00-22:30."
                 # Fallback - use tool result if available
                 if tool_result and "don't have" not in tool_result and "don't have" not in tool_result:
                     return f"Based on the hotel documentation: {tool_result}"

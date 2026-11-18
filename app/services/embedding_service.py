@@ -36,17 +36,32 @@ class EmbeddingService:
         vocab = {}
         # Key hotel-related terms that should have semantic similarity
         hotel_terms = [
+            # Check-in/out and opening hours
             "check", "in", "out", "check-in", "check-out", "checkin", "checkout",
-            "room", "rooms", "standard", "deluxe", "family", "suite", "suite",
+            "open", "opening", "hours", "reception", "24-hour", "24/7", "available",
+            "arrival", "departure", "time", "when", "start", "end", "close",
+            # Rooms
+            "room", "rooms", "standard", "deluxe", "family", "suite", "bedroom",
+            "occupancy", "guest", "guests", "bed", "beds", "single", "double", "king",
+            "sofa", "bathroom", "private", "view", "sea",
+            # Hotel info
             "hotel", "grand", "ocean", "lisbon", "portugal", "address", "phone",
+            "location", "located", "where", "contact", "email",
+            # Facilities
             "facilities", "pool", "fitness", "restaurant", "bar", "reception",
-            "wifi", "wi-fi", "parking",
-            "pets", "pet", "dog", "allowed", "availability",
+            "wifi", "wi-fi", "parking", "parking", "service", "services",
+            "amenities", "included", "breakfast", "additional", "fee",
+            # Pets
+            "pets", "pet", "dog", "cat", "allowed", "availability", "confirm",
+            # Cancellation
             "cancellation", "cancel", "policy", "charge", "hours", "arrival",
-            "breakfast", "included", "service", "services", "amenities",
-            "price", "rate", "cost", "euro", "eur",
-            "location", "nearby", "attractions", "transport", "metro", "airport",
-            "booking", "reserve", "reservation", "guest", "guests",
+            "refund", "free", "penalty", "fee",
+            # Pricing
+            "price", "rate", "cost", "euro", "eur", "night", "per",
+            # Booking
+            "booking", "reserve", "reservation", "reservation",
+            # General
+            "nearby", "attractions", "transport", "metro", "airport",
         ]
         for i, term in enumerate(hotel_terms):
             vocab[term.lower()] = i

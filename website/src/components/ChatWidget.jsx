@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { hotelApi } from '../services/api'
-import { Send, Loader2, Bot, User, X, ChevronDown, ChevronUp, Trash2, Copy, Check, MessageSquare } from 'lucide-react'
+import { Send, Loader2, Bot, User, X, MessageSquare } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function ChatWidget() {
@@ -8,13 +8,13 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)
+  const [typing, setTyping] = useState(false)
+  const [sessionId] = useState(() => 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9))
   const messagesEndRef = useRef(null)
-  const chatContainerRef = useRef(null)
 
   useEffect(() => {
     scrollToBottom()
-  }, [messages])
+  }, [messages, typing])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -29,21 +29,28 @@ export default function ChatWidget() {
     const currentInput = input
     setInput('')
     setLoading(true)
+    setTyping(true)
 
     try {
       const response = await hotelApi.chat(currentInput, sessionId)
+      
+      // Show typing indicator for 2 seconds
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      setTyping(false)
+      
       const botMessage = { 
         role: 'assistant', 
-        content: response.data.response || response.data.message || 'I apologize, but I couldn\'t process that request.', 
+        content: response.data.response || response.data.message || "I apologize, but I couldn't process that request.", 
         timestamp: new Date(),
         session_id: sessionId
       }
       setMessages(prev => [...prev, botMessage])
     } catch (error) {
       console.error('Chat error:', error)
+      setTyping(false)
       const errorMessage = { 
         role: 'assistant', 
-        content: 'I\'m sorry, I\'m having trouble connecting. Please try again in a moment.', 
+        content: "I'm sorry, I'm having trouble connecting. Please try again in a moment.", 
         timestamp: new Date() 
       }
       setMessages(prev => [...prev, errorMessage])
@@ -51,11 +58,6 @@ export default function ChatWidget() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const clearChat = () => {
-    setMessages([])
-    toast.success('Chat cleared')
   }
 
   const copyMessage = (content) => {
@@ -74,6 +76,71 @@ export default function ChatWidget() {
     'Are pets allowed?',
   ]
 
+  // Render a single message
+  const renderMessage = (message, index) => {
+    const isUser = message.role === 'user'
+    return (
+      <div key={index} className={"flex " + (isUser ? 'justify-end' : 'justify-start')}>
+        <div className={"max-w-[85%] " + (isUser ? 'order-2' : 'order-1')}>
+          {!isUser && (
+            <div className="flex items-start space-x-2 mb-1">
+              <div className="w-7 h-7 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Bot className="h-3.5 w-3.5 text-primary-600" />
+              </div>
+            </div>
+          )}
+          <div className={"flex flex-col " + (isUser ? 'items-end' : 'items-start') + " space-y-1"}>
+            <div className={"px-4 py-2.5 rounded-2xl " + (
+              isUser
+                ? 'bg-primary-600 text-white rounded-br-md'
+                : 'bg-gray-50 text-gray-900 border border-gray-100 rounded-bl-md shadow-sm'
+            )}>
+              <p className="whitespace-pre-wrap text-sm">{message.content}</p>
+            </div>
+            <div className="flex items-center space-x-1.5 mt-1">
+              <span className={"text-xs " + (isUser ? 'text-primary-400' : 'text-gray-400')}>
+                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+              {!isUser && (
+                <button
+                  onClick={() => copyMessage(message.content)}
+                  className="p-1 text-gray-400 hover:text-primary-600 transition-colors"
+                  title="Copy"
+                >
+                  <Send className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Render typing indicator
+  const renderTyping = () => {
+    return (
+      <div key="typing" className="flex justify-start">
+        <div className="max-w-[85%] order-1">
+          <div className="flex items-start space-x-2 mb-1">
+            <div className="w-7 h-7 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <Bot className="h-3.5 w-3.5 text-primary-600" />
+            </div>
+          </div>
+          <div className="flex flex-col items-start space-y-1">
+            <div className="px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-100 rounded-2xl rounded-bl-md shadow-sm">
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{animationDelay: '0ms'}} />
+                <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{animationDelay: '150ms'}} />
+                <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce" style={{animationDelay: '300ms'}} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (!isOpen) {
     return (
       <button
@@ -87,7 +154,7 @@ export default function ChatWidget() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-full max-w-md lg:max-w-lg h-[500px] lg:h-[600px] bg-white rounded-2xl shadow-xl border border-gray-100 flex flex-col overflow-hidden animate-slide-up">
+    <div className="fixed bottom-6 right-6 z-50 w-full max-w-md lg:max-w-lg h-[500px] lg:h-[600px] bg-white rounded-2xl shadow-xl border border-gray-100 flex flex-col overflow-hidden">
       {/* Chat Header */}
       <header className="bg-primary-600 text-white p-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
@@ -112,7 +179,7 @@ export default function ChatWidget() {
       </header>
 
       {/* Messages */}
-      <main className="flex-1 overflow-y-auto p-4 space-y-4" ref={chatContainerRef}>
+      <main className="flex-1 overflow-y-auto p-4 space-y-4" ref={messagesEndRef}>
         {messages.length === 0 ? (
           <div className="text-center py-8">
             <div className="w-16 h-16 mx-auto mb-4 bg-primary-100 rounded-full flex items-center justify-center">
@@ -123,9 +190,9 @@ export default function ChatWidget() {
               I'm your personal AI concierge. Ask me about bookings, services, local recommendations, or anything else!
             </p>
             <div className="grid grid-cols-2 gap-2 max-w-sm mx-auto">
-              {suggestions.map((suggestion) => (
+              {suggestions.map((suggestion, idx) => (
                 <button
-                  key={suggestion}
+                  key={idx}
                   onClick={(e) => {
                     e.preventDefault()
                     setInput(suggestion)
@@ -139,44 +206,12 @@ export default function ChatWidget() {
             </div>
           </div>
         ) : (
-          messages.map((message, index) => (
-            <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] ${message.role === 'user' ? 'order-2' : 'order-1'}`}>
-                {message.role === 'assistant' && (
-                  <div className="flex items-start space-x-2 mb-1">
-                    <div className="w-7 h-7 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Bot className="h-3.5 w-3.5 text-primary-600" />
-                    </div>
-                  </div>
-                )}
-                <div className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} space-y-1`}>
-                  <div className={`px-4 py-2.5 rounded-2xl ${
-                    message.role === 'user'
-                      ? 'bg-primary-600 text-white rounded-br-md'
-                      : 'bg-gray-50 text-gray-900 border border-gray-100 rounded-bl-md shadow-sm'
-                  }`}>
-                    <p className="whitespace-pre-wrap text-sm">{message.content}</p>
-                  </div>
-                  <div className="flex items-center space-x-1.5 mt-1">
-                    <span className={`text-xs ${message.role === 'user' ? 'text-primary-400' : 'text-gray-400'}`}>
-                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                    {message.role === 'assistant' && (
-                      <button
-                        onClick={() => copyMessage(message.content)}
-                        className="p-1 text-gray-400 hover:text-primary-600 transition-colors"
-                        title="Copy"
-                      >
-                        <Copy className="h-3.5 w-3.5" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))
+          <>
+            {messages.map((message, index) => renderMessage(message, index))}
+            {typing && renderTyping()}
+            <div ref={messagesEndRef} />
+          </>
         )}
-        <div ref={messagesEndRef} />
       </main>
 
       {/* Input */}

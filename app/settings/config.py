@@ -39,7 +39,7 @@ class Settings(BaseSettings):
 
     # RAG
     rag_search_limit: int = 5
-    rag_distance_threshold: float = 0.9  # Above this = treat as no relevant context (more permissive for hotel queries)
+    rag_distance_threshold: float = 2.0  # Above this = treat as no relevant context (permissive for mock embeddings in testing)
 
     # API
     api_host: str = "0.0.0.0"

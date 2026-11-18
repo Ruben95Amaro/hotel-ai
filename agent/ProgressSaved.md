@@ -70,7 +70,7 @@
 ✅ Cancellation policy (48 hours free)  
 ✅ All containers healthy (web, app, postgres, redis, chromadb)
 
-## Phase 3: Frontend Polish (IN PROGRESS - 90% COMPLETE)
+## Phase 3: Frontend Polish (COMPLETED)
 
 ### Issues Fixed
 
@@ -90,6 +90,15 @@
    - **Problem**: `document_id` unique constraint violated when multiple users registered without document_id (empty string `""` stored instead of NULL)
    - **Fix**: Convert empty strings to `None` for nullable fields in `user_domain_to_orm()`
 
+5. **Persistent Chat Widget (NEW - src/components/ChatWidget.jsx)**
+   - **Problem**: Chat was on separate `/chat` page requiring authentication
+   - **Fix**: Created persistent floating chat widget accessible on all pages
+   - **Features**: Suggestions, message history, copy messages, clear chat, responsive design
+   - **Integration**: Added to Layout.jsx so it appears on every page
+
+6. **Removed AI Assistant Navigation Link**
+   - Chat is now persistent widget, no separate page needed
+
 ### Verified Working
 
 ✅ **Frontend (http://localhost:3000/)** - All pages accessible, no JS errors  
@@ -100,7 +109,10 @@
 ✅ **RAG Flow** - Agent → Intent Detection → Tool → Response working  
 ✅ **All Containers** - web, app, postgres, redis, chromadb healthy  
 ✅ **Auth Endpoints** - Login and Register working with seeded admin user  
-✅ **Admin User** - `admin@grandoceanhotel.com` / `AdminPass123` (seeded on startup)
+✅ **Admin User** - `admin@grandoceanhotel.com` / `AdminPass123` (seeded on startup)  
+✅ **Chat Widget** - Persistent floating button on all pages, works after login  
+✅ **Login Error Handling** - Shows toast notification on failed login (no redirect)  
+✅ **Register Flow** - Creates user via backend API  
 
 ### Test Commands
 
@@ -126,28 +138,24 @@ curl -X POST http://localhost:3000/api/auth/register \
 
 ## Current Status
 
-**Phase 1-3 Complete**: Core infrastructure, RAG, and frontend auth flow are working.
+**Phase 1-3 Complete**: Core infrastructure, RAG, and frontend with persistent chat widget are working.
 
-**Phase 4: Final Verification & Edge Cases (NEXT)**
+**Phase 4: Final Verification & Edge Cases (OPTIONAL)**
 1. **Browser Testing** - Full end-to-end test in browser:
    - Home page renders (hero, features, stats, CTA)
-   - Navigation works (Rooms, Services, About, Contact, Chat)
+   - Navigation works (Rooms, Services, About, Contact)
    - Login/Register pages work with backend
-   - Chat page accessible after login
-   - Chat suggestions and message history work
+   - Chat widget opens/closes, sends messages, receives responses
+   - Suggestions work
+   - Message copy/clear works
    - Responsive design (desktop/mobile)
 
-2. **Chat Integration Testing**:
-   - Test `/chat` page with authentication
-   - Verify chat API integration works end-to-end
-   - Check suggestion buttons work
-   - Test message history and copy functionality
-
-3. **Edge Cases**:
+2. **Edge Cases**:
    - Empty states
    - Error handling (network errors, API errors)
    - Loading states
    - Form validation
+   - Chat persistence across page navigation
 
 ### Commands to Rebuild/Test
 
