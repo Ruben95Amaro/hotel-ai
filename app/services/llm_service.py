@@ -117,8 +117,26 @@ class LLMService:
                     return "The reception is open 24 hours a day."
                 if "hotel" in user_question and ("open" in user_question or "hour" in user_question or "time" in user_question):
                     return "The reception is open 24 hours a day. Check-in starts at 15:00 and check-out is until 11:00. The pool is open 08:00-20:00, fitness 06:00-22:00, breakfast 07:00-10:30, lunch 12:00-15:00, dinner 19:00-22:30."
-                # Fallback - use tool result if available
+                # Check for reservation/booking queries - not supported by hotel documentation
+                # Be more specific to avoid false positives like "book a spa"
+                reservation_keywords = ["make a reservation", "reserve a room", "book a room", "room reservation", "hotel reservation", "check availability", "room availability"]
+                if any(phrase in user_question for phrase in reservation_keywords):
+                    return "I can help you with information about our rooms, rates, and policies, but I cannot process reservations directly. Please visit our website or contact our reception at +351 21 123 4567 to make a reservation."
+                # Also check for "book" but only in context of rooms/hotel
+                if ("book" in user_question or "booking" in user_question) and any(word in user_question for word in ["room", "hotel", "stay", "night", "accommodation"]):
+                    return "I can help you with information about our rooms, rates, and policies, but I cannot process reservations directly. Please visit our website or contact our reception at +351 21 123 4567 to make a reservation."
+                
+                # Check for queries that the hotel documentation doesn't cover
+                unsupported_keywords = ["spa", "massage", "gym", "trainer", "yoga", "pilates", "sauna", "jacuzzi", "steam", "valet", "laundry", "dry cleaning", "ironing", "shuttle", "airport transfer", "tour", "excursion", "guide", "rental", "car", "bike", "meeting", "conference", "event", "wedding", "party", "celebration", "catering", "banquet", "ballroom", "early check", "late check", "express check", "mobile check", "online check", "self check", "keyless", "digital key", "mobile key", "loyalty", "points", "rewards", "member", "vip", "upgrade", "complimentary", "free breakfast", "included breakfast", "all inclusive", "half board", "full board"]
+                if any(word in user_question for word in unsupported_keywords):
+                    return "I don't have information about that. Please contact our reception for details."
+                
+                # Fallback - use tool result if available AND relevant
                 if tool_result and "don't have" not in tool_result and "don't have" not in tool_result:
+                    # Check if tool result seems relevant to the question
+                    # If the tool result is very long (full doc dump), don't use it
+                    if len(tool_result) > 500:
+                        return "I don't have enough information to answer that question. Please ask about check-in/out times, rooms, facilities, policies, or contact information."
                     return f"Based on the hotel documentation: {tool_result}"
                 return "I don't have enough information to answer that question. Please ask about check-in/out times, rooms, facilities, policies, or contact information."
             
