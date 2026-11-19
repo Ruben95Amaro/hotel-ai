@@ -56,8 +56,60 @@ class LLMService:
             
             # Check if this is an intent detection prompt (contains tool descriptions and format instructions)
             if ("intent detection" in message_lower or "available tools" in message_lower) and "respond with a json object" in message_lower:
-                # Return a proper JSON for intent detection - default to search_hotel_docs for info queries
+                # Return appropriate tool call based on user message
                 import json
+                user_msg_lower = message_lower
+                
+                # Check for reservation/booking queries
+                if any(phrase in user_msg_lower for phrase in ["make a reservation", "reserve a room", "book a room", "room reservation", "hotel reservation", "check availability", "room availability", "i want to book", "i would like to book"]):
+                    # Use future dates (next month) to avoid past date validation
+                    from datetime import datetime, timedelta
+                    future_date = datetime.now() + timedelta(days=30)
+                    check_in = future_date.strftime("%Y-%m-%d")
+                    check_out = (future_date + timedelta(days=3)).strftime("%Y-%m-%d")
+                    return json.dumps({
+                        "tool_name": "booking_management",
+                        "arguments": {"action": "create", "guest_name": "Guest", "email": "guest@example.com", "check_in": check_in, "check_out": check_out, "room_type": "Standard Room", "guests": 2},
+                        "reasoning": "User wants to make a reservation, use booking management tool"
+                    })
+                
+                # Check for booking management (view, cancel, modify)
+                if any(phrase in user_msg_lower for phrase in ["cancel my booking", "view my booking", "modify my booking", "change my booking", "booking reference", "my reservation", "cancel reservation"]):
+                    return json.dumps({
+                        "tool_name": "booking_management",
+                        "arguments": {"action": "view", "booking_id": "", "guest_name": "Guest", "email": "guest@example.com"},
+                        "reasoning": "User wants to manage existing booking"
+                    })
+                
+                # Check for availability queries
+                if any(phrase in user_msg_lower for phrase in ["available", "availability", "rooms available", "free rooms"]):
+                    from datetime import datetime, timedelta
+                    future_date = datetime.now() + timedelta(days=30)
+                    check_in = future_date.strftime("%Y-%m-%d")
+                    check_out = (future_date + timedelta(days=3)).strftime("%Y-%m-%d")
+                    return json.dumps({
+                        "tool_name": "check_availability",
+                        "arguments": {"check_in": check_in, "check_out": check_out, "room_type": "Standard Room", "guests": 2},
+                        "reasoning": "User is asking about room availability"
+                    })
+                
+                # Check for special requests
+                if any(phrase in user_msg_lower for phrase in ["special request", "early check", "late check", "shuttle", "luggage", "extra bed", "crib", "dietary"]):
+                    return json.dumps({
+                        "tool_name": "special_requests",
+                        "arguments": {"guest_name": "Guest", "requests": ["User request"]},
+                        "reasoning": "User has a special request"
+                    })
+                
+                # Check for escalation
+                if any(phrase in user_msg_lower for phrase in ["speak to human", "talk to human", "human agent", "complaint", "manager"]):
+                    return json.dumps({
+                        "tool_name": "escalate_to_human",
+                        "arguments": {"category": "other", "description": "User requested human assistance"},
+                        "reasoning": "User requested human assistance"
+                    })
+                
+                # Default: search hotel docs for general info
                 return json.dumps({
                     "tool_name": "search_hotel_docs",
                     "arguments": {"query": "What is the check-in time?", "limit": 5},
@@ -117,14 +169,6 @@ class LLMService:
                     return "The reception is open 24 hours a day."
                 if "hotel" in user_question and ("open" in user_question or "hour" in user_question or "time" in user_question):
                     return "The reception is open 24 hours a day. Check-in starts at 15:00 and check-out is until 11:00. The pool is open 08:00-20:00, fitness 06:00-22:00, breakfast 07:00-10:30, lunch 12:00-15:00, dinner 19:00-22:30."
-                # Check for reservation/booking queries - not supported by hotel documentation
-                # Be more specific to avoid false positives like "book a spa"
-                reservation_keywords = ["make a reservation", "reserve a room", "book a room", "room reservation", "hotel reservation", "check availability", "room availability"]
-                if any(phrase in user_question for phrase in reservation_keywords):
-                    return "I can help you with information about our rooms, rates, and policies, but I cannot process reservations directly. Please visit our website or contact our reception at +351 21 123 4567 to make a reservation."
-                # Also check for "book" but only in context of rooms/hotel
-                if ("book" in user_question or "booking" in user_question) and any(word in user_question for word in ["room", "hotel", "stay", "night", "accommodation"]):
-                    return "I can help you with information about our rooms, rates, and policies, but I cannot process reservations directly. Please visit our website or contact our reception at +351 21 123 4567 to make a reservation."
                 
                 # Check for queries that the hotel documentation doesn't cover
                 unsupported_keywords = ["spa", "massage", "gym", "trainer", "yoga", "pilates", "sauna", "jacuzzi", "steam", "valet", "laundry", "dry cleaning", "ironing", "shuttle", "airport transfer", "tour", "excursion", "guide", "rental", "car", "bike", "meeting", "conference", "event", "wedding", "party", "celebration", "catering", "banquet", "ballroom", "early check", "late check", "express check", "mobile check", "online check", "self check", "keyless", "digital key", "mobile key", "loyalty", "points", "rewards", "member", "vip", "upgrade", "complimentary", "free breakfast", "included breakfast", "all inclusive", "half board", "full board"]
